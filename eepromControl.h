@@ -3,9 +3,12 @@
 
 #include <EEPROM.h>
 
-#define EEPROM_LOCATION 0
+#define EEPROM_LOCATION_ADDR 0
 
-void eepromWrite(int address, long value);
-long eepromRead(int address);
-int getEepromAddress();
+
+void     updateCountInEeprom();
+uint16_t getTotalCountFromEeprom();
+uint8_t  getEepromLocationAddress();
+void     updateEepromAddressForNextCycle();
+
 #endif

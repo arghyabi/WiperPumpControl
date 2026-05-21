@@ -21,6 +21,13 @@ uint16_t getTotalCountFromEeprom()
     return data;
 }
 
+void clearEepromCounter()
+{
+    uint8_t address = getEepromLocationAddress();
+    EEPROM.write(address, 0);
+    EEPROM.write(address + 1, 0);
+}
+
 
 uint8_t getEepromLocationAddress()
 {
@@ -29,7 +36,7 @@ uint8_t getEepromLocationAddress()
 }
 
 // it will return the address of the next location to be written
-void updateEepromAddressForNextCycle()
+uint8_t updateEepromAddressForNextCycle()
 {
     uint8_t location = getEepromLocationAddress();
 
@@ -48,5 +55,8 @@ void updateEepromAddressForNextCycle()
 
     // To save value 0->2000, a total of 2 bytes of location is needed. 
     // So it update the exsiting location + 2.
-    EEPROM.write(EEPROM_LOCATION_ADDR, (location + 2));
+    location = location + 2;
+    EEPROM.write(EEPROM_LOCATION_ADDR, (location));
+
+    return location;
 }

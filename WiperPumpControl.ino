@@ -16,28 +16,43 @@ void setup()
 
     Serial.println("-------------");
     Serial.print("Reading EEPROM:");
+
     location = getEepromLocationAddress();
-    Serial.print("Location:");
-    Serial.println(location);
     countValue = getTotalCountFromEeprom();
-    Serial.print("CountValue:");
-    Serial.println(countValue);
     
+    // If count value more than max count then the count is not valid or the
+    // location is accessed for the first time, so the default value is 0xFFFF; 
+    if(countValue > NUM_OF_MAX_COUNT) 
+    {
+        clearEepromCounter();
+        countValue = 0;
+    }
+
+    // If the data is perfetly same as max count then it shows the previously
+    // the system reached to the max count and now update the location to point
+    // to the next frame for count and reset the count value to 0.
     if (countValue == NUM_OF_MAX_COUNT)
     {
-        updateEepromAddressForNextCycle();
+        location = updateEepromAddressForNextCycle();
+        clearEepromCounter();
         countLeft = NUM_OF_MAX_COUNT;
+        countValue = 0;
     }
     else
     {
         countLeft = NUM_OF_MAX_COUNT - countValue;
     }
+
+    Serial.print("Location:");
+    Serial.println(location);
+    Serial.print("CountValue:");
+    Serial.println(countValue);
     Serial.print("CountLeft:");
     Serial.println(countLeft);
 
     Serial.println("\nEntering to loop...\n-------------");
 
-    for(int i = 0; i < countLeft; i++)
+    for(int i = countValue + 1; i <= NUM_OF_MAX_COUNT; i++)
     {
         Serial.print("Loop:");
         Serial.println(i);
@@ -47,6 +62,7 @@ void setup()
         digitalWrite(MOTOR_PIN, LOW);
         Serial.println("Motor Low");
         delay(MOTOR_OFF_TIME);
+        updateCountInEeprom();
     }
     Serial.println("I am Done for count!!");
     Serial.println("Please Do a restart for new cycle...");

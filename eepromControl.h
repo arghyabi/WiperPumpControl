@@ -5,10 +5,10 @@
 
 #define EEPROM_LOCATION_ADDR 0
 
-
+void     clearEepromCounter();
 void     updateCountInEeprom();
 uint16_t getTotalCountFromEeprom();
 uint8_t  getEepromLocationAddress();
-void     updateEepromAddressForNextCycle();
+uint8_t  updateEepromAddressForNextCycle();
 
 #endif

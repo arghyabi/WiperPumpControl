@@ -1,102 +1,167 @@
-// #include <uRTCLib.h>
-#include <LiquidCrystal_I2C.h>
+/**
+ * @file lcdControl.cpp
+ * @brief Implementation of LCD display functions for 20x4 I2C LCD
+ */
 
+#include <LiquidCrystal_I2C.h>
 #include "lcdControl.h"
 #include "pinDescription.h"
-// #include "common.h"
-// #include "extra.h"
 
-// #if ARDUINO >= 100
-//   #include "Arduino.h"
-// #else
-//   #include "WProgram.h"
-// #endif
-
-int numDigits(int val)
+/**
+ * @brief Initialize LCD display
+ *
+ * Sets up the LCD with backlight on and clears the screen.
+ *
+ * @param lcd LCD object reference
+ */
+void initLCD(LiquidCrystal_I2C &lcd)
 {
-    char str[20];
-
-    sprintf(str,"%d",abs(val));
-    return(strlen(str));
+    lcd.begin(LCD_MODULE_NO_OF_COLUMN, LCD_MODULE_NO_OF_ROW);
+    lcd.backlight();
+    lcd.clear();
 }
 
-void PrintBlank(LiquidCrystal_I2C lcd, int count)
+/**
+ * @brief Display system startup message
+ *
+ * Shows welcome message on LCD during initialization.
+ *
+ * @param lcd LCD object reference
+ */
+void displayStartup(LiquidCrystal_I2C &lcd)
 {
-    switch(count)
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Wiper Pump Control");
+    lcd.setCursor(0, 1);
+    lcd.print("System Starting...");
+    delay(2000);
+}
+
+/**
+ * @brief Display current cycle count and remaining
+ *
+ * Shows current progress on LCD:
+ * Line 0: Current cycle / Total cycles
+ * Line 1: Remaining cycles
+ *
+ * @param lcd LCD object reference
+ * @param current Current cycle number (1-2000)
+ * @param total Total cycles to complete (2000)
+ */
+void displayCount(LiquidCrystal_I2C &lcd, uint16_t current,
+                  uint16_t total)
+{
+    uint16_t remaining = total - current;
+    
+    // Line 0: Current / Total
+    lcd.setCursor(0, 0);
+    lcd.print("Cycle: ");
+    lcd.print(current);
+    lcd.print("/");
+    lcd.print(total);
+    lcd.print("    "); // Clear extra chars
+    
+    // Line 1: Remaining
+    lcd.setCursor(0, 1);
+    lcd.print("Remaining: ");
+    lcd.print(remaining);
+    lcd.print("    "); // Clear extra chars
+}
+
+/**
+ * @brief Display motor status
+ *
+ * Shows motor ON/OFF status on line 2 of LCD.
+ *
+ * @param lcd LCD object reference
+ * @param isOn true if motor is ON, false if OFF
+ */
+void displayMotorStatus(LiquidCrystal_I2C &lcd, bool isOn)
+{
+    lcd.setCursor(0, 2);
+    if(isOn)
     {
-        case 1:
-            lcd.print(" ");
-            break;
-        case 2:
-            lcd.print("  ");
-            break;
-        case 3:
-            lcd.print("   ");
-            break;
-        case 4:
-            lcd.print("    ");
-            break;
-        case 5:
-            lcd.print("     ");
-            break;
-        case 6:
-            lcd.print("      ");
-            break;
-        case 7:
-            lcd.print("       ");
-            break;
-        case 8:
-            lcd.print("        ");
-            break;
-        case 9:
-            lcd.print("         ");
-            break;
-        case 10:
-            lcd.print("          ");
-            break;
-        case 11:
-            lcd.print("           ");
-            break;
-        case 12:
-            lcd.print("            ");
-            break;
-        case 13:
-            lcd.print("             ");
-            break;
-        case 14:
-            lcd.print("              ");
-            break;
-        case 15:
-            lcd.print("               ");
-            break;
-        case 16:
-            lcd.print("                ");
-            break;
-        case 17:
-            lcd.print("                 ");
-            break;
-        case 18:
-            lcd.print("                  ");
-            break;
-        case 19:
-            lcd.print("                   ");
-            break;
-        case 20:
-            lcd.print("                    ");
-            break;
-        default:
-            lcd.print("");
-            break;
+        lcd.print("Motor: ON           ");
+    }
+    else
+    {
+        lcd.print("Motor: OFF          ");
     }
 }
 
-void PrintCount(LiquidCrystal_I2C lcd, int row, long int Count)
+/**
+ * @brief Display completion message
+ *
+ * Shows completion message when all cycles are done.
+ *
+ * @param lcd LCD object reference
+ */
+void displayComplete(LiquidCrystal_I2C &lcd)
 {
-    int CountLen = numDigits(Count);
-    lcd.setCursor(0, row);
-    lcd.print("Count: ");
-    lcd.setCursor(8, row);
-    lcd.print(Count);
-    lcd.setCursor(8 + CountLen, row);
-    PrintBlank(lcd, LCD_MODULE_NO_OF_COLUMN - (7 + CountLen));
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("  CYCLE COMPLETE!  ");
+    lcd.setCursor(0, 1);
+    lcd.print("  All 2000 cycles  ");
+    lcd.setCursor(0, 2);
+    lcd.print("    completed!     ");
+    lcd.setCursor(0, 3);
+    lcd.print(" Restart to begin ");
+}
+
+/**
+ * @brief Display error message
+ *
+ * Shows error message on LCD for debugging.
+ *
+ * @param lcd LCD object reference
+ * @param errorMsg Error message to display (max 20 chars)
+ */
+void displayError(LiquidCrystal_I2C &lcd, const char* errorMsg)
+{
+    lcd.setCursor(0, 3);
+    lcd.print("ERR:");
+    lcd.print(errorMsg);
+    lcd.print("          "); // Clear extra chars
+}
+
+/**
+ * @brief Display reset button press progress
+ *
+ * Shows countdown while reset button is held.
+ *
+ * @param lcd LCD object reference
+ * @param secondsHeld Seconds button has been held (1-5)
+ */
+void displayResetProgress(LiquidCrystal_I2C &lcd,
+                          uint8_t secondsHeld)
+{
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Reset Button Held");
+    lcd.setCursor(0, 1);
+    lcd.print("Hold for: ");
+    lcd.print(5 - secondsHeld);
+    lcd.print(" sec");
+    lcd.setCursor(0, 2);
+    lcd.print("Release to cancel");
+}
+
+/**
+ * @brief Display system reset confirmation
+ *
+ * Shows message when system is being reset.
+ *
+ * @param lcd LCD object reference
+ */
+void displaySystemReset(LiquidCrystal_I2C &lcd)
+{
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("  SYSTEM RESET!  ");
+    lcd.setCursor(0, 1);
+    lcd.print("Clearing counter...");
+    lcd.setCursor(0, 2);
+    lcd.print("Restarting system");
 }

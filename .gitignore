@@ -1,2 +1,6 @@
 docs
 .doxygen
+build
+.vscode
+*.hex
+.DS_Store

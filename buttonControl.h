@@ -6,6 +6,7 @@
 #ifndef BUTTON_CONTROL_H
 #define BUTTON_CONTROL_H
 
+#include <Wire.h>
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 

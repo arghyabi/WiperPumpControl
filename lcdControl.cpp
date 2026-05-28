@@ -3,7 +3,9 @@
  * @brief Implementation of LCD display functions for 20x4 I2C LCD
  */
 
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <Arduino.h>
 #include "lcdControl.h"
 #include "pinDescription.h"
 

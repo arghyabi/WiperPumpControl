@@ -154,7 +154,7 @@ void setup()
             delay(1000);
             
             // Software reset using watchdog or jump to 0
-            asm volatile ("jmp 0");
+              asm volatile ("jmp 0");
         }
         
         // Update LCD with current cycle being executed

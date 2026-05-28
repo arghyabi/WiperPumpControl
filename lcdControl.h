@@ -6,6 +6,7 @@
 #ifndef LCD_CONTROL_H
 #define LCD_CONTROL_H
 
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
 #define LCD_MODULE_NO_OF_ROW        4
